@@ -97,6 +97,14 @@ def get_listing_details(listing_id) -> dict:
     # YOUR CODE STARTS HERE
     # ==============================
     pass
+
+    # policy number: first li with class_='f19phm7j dir dir-ltr', within that: span with class_='ll4r2nl dir dir-ltr', get text
+        # get the first li with soup.find to get first match, then get inner span
+    # host type: span with class_='_1mhorg'; if exists: get text ('superhost), else: 'regular'
+    # host name: h2 with class_='_14i3z6h', get text, text after "hosted by "
+    # room type: h2 with class_='_14i3z6h', search for 'private' or 'shared' in sentence, if not 'entire' default
+    # location rating: span with class_='_4oybiu', get text
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
