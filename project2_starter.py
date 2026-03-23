@@ -3,6 +3,9 @@
 # Your student id: 4559 8385
 # Your email: apothine@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
+    # Resources used:
+        # https://stackoverflow.com/questions/13518874/python-regex-get-end-digits-from-a-string
+
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
 # Asked ChatGPT for hints on debugging and for suggestions on overall code structure
