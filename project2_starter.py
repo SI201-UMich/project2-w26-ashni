@@ -37,11 +37,34 @@ def load_listing_results(html_path) -> list[tuple]:
     Returns:
         list[tuple]: A list of tuples containing (listing_title, listing_id)
     """
-    # TODO: Implement checkout logic following the instructions
+    # Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    listings = []
+
+    # Open the file and feed file handle into Beautiful Soup
+    f_handler = open(html_path, 'r')
+    soup = BeautifulSoup(f_handler, 'html.parser')
+
+    # Find all div tags that hold listing title and id
+    listings_html = soup.find_all('div', class_='t1jojoys dir dir-ltr')
+
+    # Go through all listing tags
+    for l in listings_html:
+        # Get id in div tag and extract listing id
+            # In div tag, id appears like: id='title_<listing id>'
+        id = l.get('id', None)
+        listing_id = re.match(r'.*?_([0-9]+)$', id).group(1)
+
+        # Get title text
+        listing_title = l.text
+
+        # Append (title, id) to list of listings
+        listings.append((listing_title, listing_id))
+
+    f_handler.close()
+    return listings
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -193,9 +216,10 @@ class TestCases(unittest.TestCase):
         self.detailed_data = create_listing_database(self.search_results_path)
 
     def test_load_listing_results(self):
-        # TODO: Check that the number of listings extracted is 18.
-        # TODO: Check that the FIRST (title, id) tuple is  ("Loft in Mission District", "1944564").
-        pass
+        # Check that the number of listings extracted is 18.
+        self.assertEqual(len(self.listings), 18)
+        # Check that the FIRST (title, id) tuple is  ("Loft in Mission District", "1944564").
+        self.assertEqual(self.listings[0], ("Loft in Mission District", "1944564"))
 
     def test_get_listing_details(self):
         html_list = ["467507", "1550913", "1944564", "4614763", "6092596"]
