@@ -92,11 +92,58 @@ def get_listing_details(listing_id) -> dict:
             }
         }
     """
-    # TODO: Implement checkout logic following the instructions
+    # Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    listing_details = {}
+
+    file_path = os.path.join('html_files', f'listing_{listing_id}.html')
+    f_handler = open(file_path, 'r')
+    soup = BeautifulSoup(f_handler, 'html.parser')
+
+    # Get list item and then inner span to get policy number
+    li = soup.find('li', class_='f19phm7j dir dir-ltr')
+    span_policy = li.find_next('span')
+    policy_num = span_policy.text
+
+    # Get span to see if 'Superhost' listed, if not set to 'regular'
+    span_type = soup.find('span', class_='_1mhorg9')
+    host_type = span_type.text if span_type else 'regular'
+
+    # Get h2 with host name and room type, pull out text and get host name(s) and use
+    # string matching to assign room type
+    h2_name_room = soup.find('h2', class_='_14i3z6h')
+    hosted_by = h2_name_room.text
+    host_name = re.search(r'.*?[Hh]osted by\s+(.+)$', hosted_by).group(1).strip()
+    
+    # Set string to lowercase for easier comparison
+    hosted_by_lower = hosted_by.lower()
+
+    # Check if keyword for room type in string and assign room type
+    if "private" in hosted_by_lower:
+        room_type = "Private Room"
+    elif "shared" in hosted_by_lower:
+        room_type = "Shared Room"
+    else:
+        room_type = "Entire Room"
+
+    # Get div with text "Location" and then next span to get location rating
+    div_outer = soup.find('div', class_='_y1ba89', string="Location")
+    span_loc = div_outer.find_next('span', class_='_4oybiu')
+    location_rating = span_loc.text
+
+    # Create listing details inner dictionary
+    listing_details[listing_id] = {}
+    details = listing_details[listing_id]
+    details['policy_number'] = policy_num
+    details['host_type'] = host_type
+    details['host_name'] = host_name
+    details['room_type'] = room_type
+    details['location_rating'] = float(location_rating)
+
+    f_handler.close()
+    return listing_details
 
     # policy number: first li with class_='f19phm7j dir dir-ltr', within that: span with class_='ll4r2nl dir dir-ltr', get text
         # get the first li with soup.find to get first match, then get inner span
@@ -235,13 +282,20 @@ class TestCases(unittest.TestCase):
     def test_get_listing_details(self):
         html_list = ["467507", "1550913", "1944564", "4614763", "6092596"]
 
-        # TODO: Call get_listing_details() on each listing id above and save results in a list.
+        # Call get_listing_details() on each listing id above and save results in a list.
+        results = []
+        for id in html_list:
+            details = get_listing_details(id)
+            results.append(details)
 
-        # TODO: Spot-check a few known values by opening the corresponding listing_<id>.html files.
+        # Spot-check a few known values by opening the corresponding listing_<id>.html files.
         # 1) Check that listing 467507 has the correct policy number "STR-0005349".
+        self.assertEqual(results[0]["467507"]["policy_number"], "STR-0005349")
         # 2) Check that listing 1944564 has the correct host type "Superhost" and room type "Entire Room".
+        self.assertEqual(results[2]["1944564"]["host_type"], "Superhost")
+        self.assertEqual(results[2]["1944564"]["room_type"], "Entire Room")
         # 3) Check that listing 1944564 has the correct location rating 4.9.
-        pass
+        self.assertEqual(results[2]["1944564"]["location_rating"], 4.9)
 
     def test_create_listing_database(self):
         # TODO: Check that each tuple in detailed_data has exactly 7 elements:
