@@ -309,11 +309,23 @@ def validate_policy_numbers(data) -> list[str]:
     Returns:
         list[str]: A list of listing_id values whose policy numbers do NOT match the valid format
     """
-    # TODO: Implement checkout logic following the instructions
+    # Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    invalid_policy_nums = []
+
+    # Get id and policy number for each listing, exclude "Pending" or "Exempt" listings, and check for matches to policy number format
+    # If there is no match to either format, add id to invalid policy numbers list
+    for tuple in data:
+        _, id, policy_num, _, _, _, _ = tuple
+        if policy_num != "Pending" and policy_num != "Exempt":
+            form1 = re.match(r'^20[0-9]{2}-00[0-9]{4}STR$', policy_num)
+            form2 = re.match(r'^STR-000[0-9]{4}$', policy_num)
+            if form1 is None and form2 is None:
+                invalid_policy_nums.append(id)
+
+    return invalid_policy_nums
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -403,9 +415,10 @@ class TestCases(unittest.TestCase):
         self.assertEqual(avg_dict["Private Room"], 4.9)
 
     def test_validate_policy_numbers(self):
-        # TODO: Call validate_policy_numbers() on detailed_data and save the result into a variable invalid_listings.
-        # TODO: Check that the list contains exactly "16204265" for this dataset.
-        pass
+        # Call validate_policy_numbers() on detailed_data and save the result into a variable invalid_listings.
+        invalid_listings = validate_policy_numbers(self.detailed_data)
+        # Check that the list contains exactly "16204265" for this dataset.
+        self.assertIn("16204265", invalid_listings)
 
 
 def main():
