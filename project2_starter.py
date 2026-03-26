@@ -106,32 +106,60 @@ def get_listing_details(listing_id) -> dict:
     li = soup.find('li', class_='f19phm7j dir dir-ltr')
     span_policy = li.find_next('span')
     policy_num = span_policy.text
+    # Ensure capitalization of "Pending" or "Exempt" to follow p2 instructions
+    if policy_num.lower() == "pending" or policy_num.lower() == "exempt":
+        policy_num = policy_num.capitalize()
 
     # Get span to see if 'Superhost' listed, if not set to 'regular'
     span_type = soup.find('span', class_='_1mhorg9')
     host_type = span_type.text if span_type else 'regular'
 
-    # Get h2 with host name and room type, pull out text and get host name(s) and use
-    # string matching to assign room type
+    # There are two difference formats observed for host name and room type listed on an html page
+        # (1) Get h2 with host name and room type, pull out text and get host name(s) and use string matching to assign room type
+        # (2) Get two divs that separate room type and host name, pull out text and get host name(s) and assign room type
+
+    # Set host name and room type to None
+    host_name = None
+    room_type = None
+
+    # Format (1)
     h2_name_room = soup.find('h2', class_='_14i3z6h')
-    hosted_by = h2_name_room.text
-    host_name = re.search(r'.*?[Hh]osted by\s+(.+)$', hosted_by).group(1).strip()
-    
-    # Set string to lowercase for easier comparison
-    hosted_by_lower = hosted_by.lower()
+    if h2_name_room:
+        hosted_by = h2_name_room.get_text(strip=True)
+        match = re.search(r'.*?[Hh]osted by\s+(.+)$', hosted_by)
+        if match:
+            host_name = match.group(1)
 
-    # Check if keyword for room type in string and assign room type
-    if "private" in hosted_by_lower:
-        room_type = "Private Room"
-    elif "shared" in hosted_by_lower:
-        room_type = "Shared Room"
-    else:
-        room_type = "Entire Room"
+        lower_hosted = hosted_by.lower()
+        # Check if keyword for room type in string and assign room type
+        if "private" in lower_hosted:
+            room_type = "Private Room"
+        elif "shared" in lower_hosted:
+            room_type = "Shared Room"
+        else:
+            room_type = "Entire Room"
 
-    # Get div with text "Location" and then next span to get location rating
+    # If Format (1) provides nothing, then follow with Format (2) to collect info
+    if host_name is None:
+        room_div = soup.find('div', class_='_kh3xmo')
+        host_div = soup.find('div', class_='_cv5qq4')
+
+        host_text = host_div.get_text(strip=True)
+        host_name = re.search(r'.*?[Hh]osted by\s+(.+)$', host_text).group(1)
+        room_text = room_div.get_text(strip=True).lower()
+
+        # Check if keyword for room type in string and assign room type
+        if "private" in room_text:
+            room_type = "Private Room"
+        elif "shared" in room_text:
+            room_type = "Shared Room"
+        else:
+            room_type = "Entire Room"
+
+    # Get div with text "Location" and then next span to get location rating, if not found set rating to 0.0
     div_outer = soup.find('div', class_='_y1ba89', string="Location")
-    span_loc = div_outer.find_next('span', class_='_4oybiu')
-    location_rating = span_loc.text
+    span_loc = div_outer.find_next('span', class_='_4oybiu') if div_outer else None
+    location_rating = float(span_loc.text) if span_loc else 0.0
 
     # Create listing details inner dictionary
     listing_details[listing_id] = {}
@@ -140,18 +168,10 @@ def get_listing_details(listing_id) -> dict:
     details['host_type'] = host_type
     details['host_name'] = host_name
     details['room_type'] = room_type
-    details['location_rating'] = float(location_rating)
+    details['location_rating'] = location_rating
 
     f_handler.close()
     return listing_details
-
-    # policy number: first li with class_='f19phm7j dir dir-ltr', within that: span with class_='ll4r2nl dir dir-ltr', get text
-        # get the first li with soup.find to get first match, then get inner span
-    # host type: span with class_='_1mhorg'; if exists: get text ('superhost), else: 'regular'
-    # host name: h2 with class_='_14i3z6h', get text, text after "hosted by "
-    # room type: h2 with class_='_14i3z6h', search for 'private' or 'shared' in sentence, if not 'entire' default
-    # location rating: span with class_='_4oybiu', get text
-
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -172,7 +192,20 @@ def create_listing_database(html_path) -> list[tuple]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    listing_db = []
+
+    # Get listing results (title, id)
+    listing_results = load_listing_results(html_path)
+    
+    # For each listing id, get the listing details and append to listing database (list of tuples)
+    for listing in listing_results:
+        title, id = listing
+        listing_details = get_listing_details(id)
+
+        details = listing_details[f'{id}']
+        listing_db.append((title, id, details['policy_number'], details['host_type'], details['host_name'], details['room_type'], details['location_rating']))
+
+    return listing_db
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -298,11 +331,14 @@ class TestCases(unittest.TestCase):
         self.assertEqual(results[2]["1944564"]["location_rating"], 4.9)
 
     def test_create_listing_database(self):
-        # TODO: Check that each tuple in detailed_data has exactly 7 elements:
+        # Check that each tuple in detailed_data has exactly 7 elements:
         # (listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating)
-
-        # TODO: Spot-check the LAST tuple is ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8).
-        pass
+        listing_db = create_listing_database(self.search_results_path)
+        for listing in listing_db:
+            self.assertEqual(len(listing), 7)
+        # Spot-check the LAST tuple is ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8).
+        last_tuple = listing_db[-1]
+        self.assertEqual(last_tuple, ("Guest suite in Mission District", "467507", "STR-0005349", "Superhost", "Jennifer", "Entire Room", 4.8))
 
     def test_output_csv(self):
         out_path = os.path.join(self.base_dir, "test.csv")
