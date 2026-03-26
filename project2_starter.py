@@ -2,17 +2,25 @@
 # Your name: Ashni Pothineni
 # Your student id: 4559 8385
 # Your email: apothine@umich.edu
-# Who or what you worked with on this homework (including generative AI like ChatGPT):
+# Who or what you worked with on this homework (including generative AI like ChatGPT): No teammates
     # Resources used:
         # https://stackoverflow.com/questions/13518874/python-regex-get-end-digits-from-a-string
         # https://stackoverflow.com/questions/3121979/how-to-sort-a-list-tuple-of-lists-tuples-by-the-element-at-a-given-index
         # Discussion Slides for Midterm Review (csv read and write for output_csv function)
+        # https://www.geeksforgeeks.org/python/re-match-in-python/
+        # https://www.w3schools.com/python/ref_requests_get.asp#:~:text=Module%20Reference,Optional.
+        # https://iproyal.com/blog/python-requests-headers-tutorial/
+        # ChatGPT
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
 # Asked ChatGPT for hints on debugging and for suggestions on overall code structure
-#
+    # I asked ChatGPT for help debugging the extra credit for any reason for why it might be failing (returning empty list)
+    # It told me that Google Scholar uses bot detection to block requests without a user-agent, so I should
+    # set a brower-like header.  
 # Did your use of GenAI on this assignment align with your goals and guidelines in your Gen AI contract? If not, why?
-#
+    # My use of GenAI on this assignment did not fully align with my goals and guidelines. This is because I consulted it for
+    # the extra credit to directly help with my code writing. I don't consider this a big concern because it helped explain what 
+    # I needed without providing direct answers, and I learned more about using the request library when having query values.
 # --- ARGUMENTS & EXPECTED RETURN VALUES PROVIDED --- #
 # --- SEE INSTRUCTIONS FOR FULL DETAILS ON METHOD IMPLEMENTATION --- #
 
@@ -345,7 +353,36 @@ def google_scholar_searcher(query):
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    titles_list = []
+    url = "https://scholar.google.com/scholar"
+
+    # Set params to query and headers to user-agent of a browser
+    params = {'q': query}
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    # Get request with params and headers
+    response = requests.get(url, params=params, headers=headers)
+
+    # If failure, return empty list
+    if response.status_code != 200:
+        print("Error: failed to retrieve web page.")
+        return titles_list
+    
+    # Get html page
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Get tags to pull list of titles on first page
+    div_tags = soup.find_all('div', class_='gs_ri')
+    for div in div_tags:
+        h3_tag = div.find('h3', class_='gs_rt')
+        if h3_tag:
+            a_tag = h3_tag.find('a')
+            if a_tag:
+                titles_list.append(a_tag.text)
+
+    return titles_list
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -424,6 +461,7 @@ class TestCases(unittest.TestCase):
 def main():
     detailed_data = create_listing_database(os.path.join("html_files", "search_results.html"))
     output_csv(detailed_data, "airbnb_dataset.csv")
+    # print(google_scholar_searcher("airbnb"))
 
 
 if __name__ == "__main__":
