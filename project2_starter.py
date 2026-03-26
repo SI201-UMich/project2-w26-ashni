@@ -5,7 +5,8 @@
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
     # Resources used:
         # https://stackoverflow.com/questions/13518874/python-regex-get-end-digits-from-a-string
-
+        # https://stackoverflow.com/questions/3121979/how-to-sort-a-list-tuple-of-lists-tuples-by-the-element-at-a-given-index
+        # Discussion Slides for Midterm Review (csv read and write for output_csv function)
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
 # Asked ChatGPT for hints on debugging and for suggestions on overall code structure
@@ -188,7 +189,7 @@ def create_listing_database(html_path) -> list[tuple]:
         list[tuple]: A list of tuples. Each tuple contains:
         (listing_title, listing_id, policy_number, host_type, host_name, room_type, location_rating)
     """
-    # TODO: Implement checkout logic following the instructions
+    # Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
@@ -257,11 +258,41 @@ def avg_location_rating_by_room_type(data) -> dict:
     Returns:
         dict: {room_type: average_location_rating}
     """
-    # TODO: Implement checkout logic following the instructions
+    # Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    avg_location_rating = {}
+
+    # Set up values for tracking sum and count
+    entire_total = 0
+    shared_total = 0
+    private_total = 0
+
+    entire_count = 0
+    shared_count = 0
+    private_count = 0
+
+    # Get room type and rating for each tuple, exclude tuples with rating of 0.0, add to total and count depending on room type match
+    for tuple in data:
+        _, _, _, _, _, room_type, loc_rating = tuple
+        if loc_rating != 0.0:
+            if room_type == "Entire Room":
+                entire_total += loc_rating
+                entire_count += 1
+            if room_type == "Shared Room":
+                shared_total += loc_rating
+                shared_count += 1
+            if room_type == "Private Room":
+                private_total += loc_rating
+                private_count += 1
+
+    # Calculate averages and input into output dict
+    avg_location_rating["Entire Room"] = entire_total / entire_count if entire_count != 0 else 0.0
+    avg_location_rating["Private Room"] = private_total / private_count if private_count != 0 else 0.0
+    avg_location_rating["Shared Room"] = shared_total / shared_count if shared_count != 0 else 0.0
+
+    return avg_location_rating
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -366,9 +397,10 @@ class TestCases(unittest.TestCase):
         os.remove(out_path)
 
     def test_avg_location_rating_by_room_type(self):
-        # TODO: Call avg_location_rating_by_room_type() and save the output.
-        # TODO: Check that the average for "Private Room" is 4.9.
-        pass
+        # Call avg_location_rating_by_room_type() and save the output.
+        avg_dict = avg_location_rating_by_room_type(self.detailed_data)
+        # Check that the average for "Private Room" is 4.9.
+        self.assertEqual(avg_dict["Private Room"], 4.9)
 
     def test_validate_policy_numbers(self):
         # TODO: Call validate_policy_numbers() on detailed_data and save the result into a variable invalid_listings.
