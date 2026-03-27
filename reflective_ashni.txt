@@ -3,7 +3,11 @@ rentals in San Francisco? In your response, describe why you believe the system 
 adequate or inadequate. If you believe the system is inadequate, discuss a possible
 change in actions required to improve accountability in this system. 
 
-Answer:
+Answer: I don't think the current system provides adequate accountability around short-term
+rentals in SF. I think the fact that the policy number can be "pending", "exempt", or invalid 
+results in risks for those looking for short-term rentals as they can be susceptible to fraudulent
+listings on the site. A possible change is for Airbnb to verify these policy numbers before 
+allowing the listing to be visible on the site. 
 
 2. As discussed in the introduction, the legality of web scraping is still uncertain in the US.
 Skim through the Legal Issues section of Web Scraping in the US on Wikipedia and this
@@ -11,7 +15,15 @@ article about the legal issues with the Computer Fraud and Abuse Act, and descri
 least one factor you believe is important to consider when discussing the legality of web
 scraping and why.
 
-Answer:
+Answer: Some factors important to consider when discussing the legality of web scraping is 
+whether the data is publicly available, how it's access affects the site owner's system, and 
+whether it's beneficial for public interest. In the cases discussed in the Wikipedia page and 
+article on the CFAA, it's important to consider whether the data being scraped is publicly 
+available because if is was not, it would be adversely affecting the site owners' information 
+property. By contrast, if the information is publicly available, it's becomes more challenging
+to address the legality of the data scraped from the site. There would be more nuance and 
+discussion surrounding the purpose behind the web scraping and the affects on the site owner's 
+system.    
 
 3. Scraping public data does not always lead to positive results for society. For example,
 look to Facebook–Cambridge Analytica data scandal - Wikipedia or Clearview AI -
@@ -20,4 +32,12 @@ publicly provided) is unethical. Web scraping requires thoughtful intervention. 
 least two guidelines you think are important to consider when deciding whether to do
 web scraping.
 
-Answer:
+Answer: One guideline would be to consider / respect user privacy. Using someone's personal
+data without their consent (even if publicly provided) can lead to harm or negative 
+outcomes to that user, since that user likely didn't publicize such information to be collected
+and analyzed in such a way. Storing and analyzing such data can lead to privacy violations and 
+be even more severe with data breaches. Another guideline would be to be for those who web scrape
+to provide their purpose for web scraping and provide transparency on what data they are collecting, 
+what permissions they have, and what they are using the data for. These two guidelines 
+are important to consider for web scraping, as it ensures that there is reasonable use 
+and justification without breaching user privacy and trust. 
